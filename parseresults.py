@@ -32,9 +32,9 @@ with open(outputFile, "w") as outfile:
     outfile.write("\t<testsuite name=\"Aggregated\" tests=\"" + str(len(testResults)) + "\" failures=\"" + str(failures)+ "\">\n")
 
     for result in testResults:
-        outfile.write("\t\t<testcase name=\"" + result.GetTestName() + "\">\n")
+        outfile.write("\t\t<testcase name=\"" + str(result.GetTestName()) + "\">\n")
         if(result.GetStatusCode() < 0 ):
-            outfile.write("\t\t\t<failure> <![CDATA[" + result.GetFailureReason() + "]]></failure>\n")
+            outfile.write("\t\t\t<failure> <![CDATA[" + str(result.GetFailureReason()) + "]]></failure>\n")
         outfile.write("\t\t</testcase>\n");
     outfile.write("\t</testsuite>\n")
     outfile.write("</testsuites>\n")
