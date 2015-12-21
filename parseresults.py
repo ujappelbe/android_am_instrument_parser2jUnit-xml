@@ -20,21 +20,29 @@ output = ParseAmInstrumentOutput(data)
 testResults = output[0]
 
 failures = 0
+skipped = 0
 for result in testResults:
     if(result.GetStatusCode() < 0 ):
-        failures += 1
+        if(result.GetStatusCode() == -3):
+            skipped += 1
+        else:
+            failures += 1
+
 
 print("Amount of steps = " + str(len(testResults)))
 
 with open(outputFile, "w") as outfile:
     outfile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-    outfile.write("<testsuites name=\"Unit Tests\" tests=\"" + str(len(testResults)) + "\" failures=\"" + str(failures) + "\">\n")
-    outfile.write("\t<testsuite name=\"Aggregated\" tests=\"" + str(len(testResults)) + "\" failures=\"" + str(failures)+ "\">\n")
+    outfile.write("<testsuites name=\"Unit Tests\" tests=\"" + str(len(testResults)) + "\" failures=\"" + str(failures) + "\" skipped=\"" + str(skipped) + "\"" + ">\n")
+    outfile.write("\t<testsuite name=\"Aggregated\" tests=\"" + str(len(testResults)) + "\" failures=\"" + str(failures) + "\" skipped=\"" + str(skipped) + "\"" + ">\n")
 
     for result in testResults:
         outfile.write("\t\t<testcase name=\"" + str(result.GetTestName()) + "\">\n")
         if(result.GetStatusCode() < 0 ):
-            outfile.write("\t\t\t<failure> <![CDATA[" + str(result.GetFailureReason()) + "]]></failure>\n")
+            if(result.GetStatusCode() == -3):
+                outfile.write("\t\t\t<skipped />\n")
+            else:
+                outfile.write("\t\t\t<failure> <![CDATA[" + str(result.GetFailureReason()) + "]]></failure>\n")
         outfile.write("\t\t</testcase>\n");
     outfile.write("\t</testsuite>\n")
     outfile.write("</testsuites>\n")
