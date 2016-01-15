@@ -21,7 +21,7 @@ inputFile = sys.argv[1]
 outputFile = sys.argv[2]
 rootSuiteName = "Root"
 if(len(sys.argv) > 3):
-    rootSuiteName = re.sub('[^A-Za-z0-9\.\-_, ]+', ' ', sys.argv[3])
+    rootSuiteName = re.sub('[^A-Za-z0-9\.\-_, ]+', '', sys.argv[3])
 
 print("Will read from file '" + inputFile + "' and output to '" + outputFile + "'" )
 print("Using '" + rootSuiteName + "' as test suite root name")
