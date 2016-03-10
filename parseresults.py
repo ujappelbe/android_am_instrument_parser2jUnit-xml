@@ -46,13 +46,18 @@ for result in testResults:
             skipped += 1
         else:
             failures += 1
+if(numTests != str(len(testResults))):
+    failures += 1
 
 print("Amount of steps = " + str(len(testResults)) + " (Claimed " + numTests + ")" )
 
+# add the step that checks that all tests have been executed the the number of total test steps
+totalNumTests = len(testResults) + 1
+
 with open(outputFile, "w") as outfile:
     outfile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-    outfile.write("<testsuites name=\"Unit Tests\" tests=\"" + str(len(testResults)) + "\" failures=\"" + str(failures) + "\" skipped=\"" + str(skipped) + "\"" + ">\n")
-    outfile.write("\t<testsuite name=\"" + rootSuiteName + "\" tests=\"" + str(len(testResults)) + "\" failures=\"" + str(failures) + "\" skipped=\"" + str(skipped) + "\"" + ">\n")
+    outfile.write("<testsuites name=\"Unit Tests\" tests=\"" + str(totalNumTests) + "\" failures=\"" + str(failures) + "\" skipped=\"" + str(skipped) + "\"" + ">\n")
+    outfile.write("\t<testsuite name=\"" + rootSuiteName + "\" tests=\"" + str(totalNumTests) + "\" failures=\"" + str(failures) + "\" skipped=\"" + str(skipped) + "\"" + ">\n")
 
     for result in testResults:
         outfile.write("\t\t<testcase name=\"" + str(result.GetTestName()) + "\">\n")
