@@ -34,6 +34,7 @@ reNumTests = re.compile(r'INSTRUMENTATION_STATUS: numtests=(\d*)$')
 for line in data.split('\n'):
  if(reNumTests.match(line)):
      numTests = reNumTests.search(line).group(1)
+     break
 
 output, bundle = ParseAmInstrumentOutput(data)
 testResults = output
