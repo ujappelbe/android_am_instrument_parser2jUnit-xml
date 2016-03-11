@@ -29,10 +29,15 @@ print("Using '" + rootSuiteName + "' as test suite root name")
 with open(inputFile, "r") as myfile:
     data = myfile.read()
 
-result = TestResult(data);
+numTests = -1
+reNumTests = re.compile(r'INSTRUMENTATION_STATUS: numtests=(\d*)$')
+for line in data.split('\n'):
+ if(reNumTests.match(line)):
+     numTests = reNumTests.search(line).group(1)
+     break
 
-output = ParseAmInstrumentOutput(data)
-testResults = output[0]
+output, bundle = ParseAmInstrumentOutput(data)
+testResults = output
 
 failures = 0
 skipped = 0
@@ -42,14 +47,18 @@ for result in testResults:
             skipped += 1
         else:
             failures += 1
+if(numTests != str(len(testResults))):
+    failures += 1
 
+print("Amount of steps = " + str(len(testResults)) + " (Claimed " + numTests + ")" )
 
-print("Amount of steps = " + str(len(testResults)))
+# add the step that checks that all tests have been executed the the number of total test steps
+totalNumTests = len(testResults) + 1
 
 with open(outputFile, "w") as outfile:
     outfile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-    outfile.write("<testsuites name=\"Unit Tests\" tests=\"" + str(len(testResults)) + "\" failures=\"" + str(failures) + "\" skipped=\"" + str(skipped) + "\"" + ">\n")
-    outfile.write("\t<testsuite name=\"" + rootSuiteName + "\" tests=\"" + str(len(testResults)) + "\" failures=\"" + str(failures) + "\" skipped=\"" + str(skipped) + "\"" + ">\n")
+    outfile.write("<testsuites name=\"Unit Tests\" tests=\"" + str(totalNumTests) + "\" failures=\"" + str(failures) + "\" skipped=\"" + str(skipped) + "\"" + ">\n")
+    outfile.write("\t<testsuite name=\"" + rootSuiteName + "\" tests=\"" + str(totalNumTests) + "\" failures=\"" + str(failures) + "\" skipped=\"" + str(skipped) + "\"" + ">\n")
 
     for result in testResults:
         outfile.write("\t\t<testcase name=\"" + str(result.GetTestName()) + "\">\n")
@@ -59,6 +68,10 @@ with open(outputFile, "w") as outfile:
             else:
                 outfile.write("\t\t\t<failure> <![CDATA[" + str(result.GetFailureReason()) + "]]></failure>\n")
         outfile.write("\t\t</testcase>\n");
+    outfile.write("\t\t<testcase name=\"All tests were executed\">\n")
+    if(numTests != str(len(testResults))):
+        outfile.write("\t\t\t<failure> <![CDATA[ Expected '" + numTests + "' steps. Got results for '" + str(len(testResults)) + "'" "]]></failure>\n")
+    outfile.write("\t\t</testcase>\n");
     outfile.write("\t</testsuite>\n")
     outfile.write("</testsuites>\n")
 
