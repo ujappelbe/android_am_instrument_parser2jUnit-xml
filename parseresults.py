@@ -29,11 +29,11 @@ print("Using '" + rootSuiteName + "' as test suite root name")
 with open(inputFile, "r") as myfile:
     data = myfile.read()
 
-numTests = -1
+numTests = "-1"
 reNumTests = re.compile(r'INSTRUMENTATION_STATUS: numtests=(\d*)$')
 for line in data.split('\n'):
  if(reNumTests.match(line)):
-     numTests = reNumTests.search(line).group(1)
+     numTests = str(reNumTests.search(line).group(1))
      break
 
 output, bundle = ParseAmInstrumentOutput(data)
@@ -50,7 +50,7 @@ for result in testResults:
 if(numTests != str(len(testResults))):
     failures += 1
 
-print("Amount of steps = " + str(len(testResults)) + " (Claimed " + numTests + ")" )
+print("Amount of steps = " + str(len(testResults)) + " (Claimed " + str(numTests) + ")" )
 
 # add the step that checks that all tests have been executed the the number of total test steps
 totalNumTests = len(testResults) + 1
