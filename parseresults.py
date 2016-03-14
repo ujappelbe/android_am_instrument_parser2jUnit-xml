@@ -1,4 +1,4 @@
- #############################################################
+#############################################################
 # This script will use am_instrument_parser from android SDK  #
 # to parse android am instruments test raw output into        #
 # junit.xml format.                                           #
@@ -6,7 +6,7 @@
 #   req1: input raw file path                                 #
 #   req2: output junit.xml file path                          #
 #   opt1: name of Root- test suite (default "Root")           #
- #############################################################
+#############################################################
 
 import sys
 import re
@@ -23,7 +23,8 @@ rootSuiteName = "Root"
 if(len(sys.argv) > 3):
     rootSuiteName = re.sub('[^A-Za-z0-9\.\-_, ]+', '', sys.argv[3])
 
-print("Will read from file '" + inputFile + "' and output to '" + outputFile + "'" )
+print("Will read from file '" + inputFile + "' and output to '" +
+      outputFile + "'")
 print("Using '" + rootSuiteName + "' as test suite root name")
 
 with open(inputFile, "r") as myfile:
@@ -32,9 +33,9 @@ with open(inputFile, "r") as myfile:
 numTests = "-1"
 reNumTests = re.compile(r'INSTRUMENTATION_STATUS: numtests=(\d*)$')
 for line in data.split('\n'):
- if(reNumTests.match(line)):
-     numTests = str(reNumTests.search(line).group(1))
-     break
+    if(reNumTests.match(line)):
+        numTests = str(reNumTests.search(line).group(1))
+        break
 
 output, bundle = ParseAmInstrumentOutput(data)
 testResults = output
@@ -42,7 +43,7 @@ testResults = output
 failures = 0
 skipped = 0
 for result in testResults:
-    if(result.GetStatusCode() < 0 ):
+    if(result.GetStatusCode() < 0):
         if(result.GetStatusCode() == -3):
             skipped += 1
         else:
@@ -50,9 +51,11 @@ for result in testResults:
 if(numTests != str(len(testResults))):
     failures += 1
 
-print("Amount of steps = " + str(len(testResults)) + " (Claimed " + str(numTests) + ")" )
+print("Amount of steps = " + str(len(testResults)) +
+      " (Claimed " + str(numTests) + ")")
 
-# add the step that checks that all tests have been executed the the number of total test steps
+# add the step that checks that all tests have been executed the the number of
+# total test steps
 totalNumTests = len(testResults) + 1
 
 with open(outputFile, "w") as outfile:
@@ -62,16 +65,16 @@ with open(outputFile, "w") as outfile:
 
     for result in testResults:
         outfile.write("\t\t<testcase name=\"" + str(result.GetTestName()) + "\">\n")
-        if(result.GetStatusCode() < 0 ):
+        if(result.GetStatusCode() < 0):
             if(result.GetStatusCode() == -3):
                 outfile.write("\t\t\t<skipped />\n")
             else:
                 outfile.write("\t\t\t<failure> <![CDATA[" + str(result.GetFailureReason()) + "]]></failure>\n")
-        outfile.write("\t\t</testcase>\n");
+        outfile.write("\t\t</testcase>\n")
     outfile.write("\t\t<testcase name=\"All tests were executed\">\n")
     if(numTests != str(len(testResults))):
         outfile.write("\t\t\t<failure> <![CDATA[ Expected '" + numTests + "' steps. Got results for '" + str(len(testResults)) + "'" "]]></failure>\n")
-    outfile.write("\t\t</testcase>\n");
+    outfile.write("\t\t</testcase>\n")
     outfile.write("\t</testsuite>\n")
     outfile.write("</testsuites>\n")
 
