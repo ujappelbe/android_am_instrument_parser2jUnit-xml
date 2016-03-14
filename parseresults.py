@@ -10,6 +10,7 @@
 
 import sys
 import re
+import string
 from am_instrument_parser import TestResult
 from am_instrument_parser import ParseAmInstrumentOutput
 
@@ -31,12 +32,15 @@ with open(inputFile, "r") as myfile:
     data = myfile.read()
 
 numTests = "-1"
+numTestsLine = -1
 reNumTests = re.compile(r'INSTRUMENTATION_STATUS: numtests=(\d*)$')
-for line in data.split('\n'):
+for line in data.splitlines():
+    numTestsLine += 1
     if(reNumTests.match(line)):
         numTests = str(reNumTests.search(line).group(1))
         break
 
+print("DEBUG: Number of lines checked to find numTests = '" + str(numTestsLine) + "'")
 output, bundle = ParseAmInstrumentOutput(data)
 testResults = output
 
