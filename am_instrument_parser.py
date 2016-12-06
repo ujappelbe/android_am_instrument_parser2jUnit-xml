@@ -40,7 +40,6 @@ def ParseAmInstrumentOutput(result):
     code.
   """
 
-  re_status_code = re.compile(r'INSTRUMENTATION_STATUS_CODE: (?P<status_code>-?\d)$')
   test_results = []
   inst_finished_bundle = {}
 

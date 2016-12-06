@@ -1,5 +1,7 @@
 # android_am_instrument_parser2jUnit-xml
 
+From https://github.com/ujappelbe/android_am_instrument_parser2jUnit-xml
+
 Turn raw android "am instrument" commands run output into jUnit.xml. Gradle will normally do this for you. This might be useful if you need to run android unit tests separate from building the apk. Tested on Python 2.7.10
 
 
