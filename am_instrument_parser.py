@@ -20,6 +20,7 @@ the device."""
 
 import re
 import string
+import sys
 
 
 def ParseAmInstrumentOutput(result):
@@ -54,7 +55,8 @@ def ParseAmInstrumentOutput(result):
       elif test_result.GetStatusCode() in [0, -1, -2, -3, -4]:
         test_results.append(test_result)
       else:
-        pass
+        print("Error. Not supported status code (" + str(test_result.GetStatusCode()) + "). Script aborted.")
+        sys.exit(-1)
       result_block_string = ""
     if "INSTRUMENTATION_CODE:" in line:
       inst_finished_bundle = _ParseInstrumentationFinishedBundle(result_block_string)
