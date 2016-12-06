@@ -51,7 +51,7 @@ def ParseAmInstrumentOutput(result):
       test_result = TestResult(result_block_string)
       if test_result.GetStatusCode() == 1: # The test started
         pass
-      elif test_result.GetStatusCode() in [0, -1, -2, -3]:
+      elif test_result.GetStatusCode() in [0, -1, -2, -3, -4]:
         test_results.append(test_result)
       else:
         pass
@@ -136,8 +136,8 @@ class TestResult(object):
     self._failure_reason = None
     self._fields_map = {}
 
-    re_status_code = re.search(r'INSTRUMENTATION_STATUS_CODE: '
-        '(?P<status_code>1|0|-1|-2|-3)', result_block_string)
+    re_status_code = re.search(r'INSTRUMENTATION_STATUS_CODE: (?P<status_code>-?\d+)', result_block_string)
+
     re_fields = re.compile(r'INSTRUMENTATION_STATUS: '
         '(?P<key>[\w.]+)=(?P<value>.*?)(?=\nINSTRUMENTATION_STATUS)', re.DOTALL)
 
