@@ -40,8 +40,10 @@ for line in data.splitlines():
         numTests = str(reNumTests.search(line).group(1))
         break
 
-print("DEBUG: Number of lines checked to find numTests = '" + str(numTestsLine) + "'")
 output, bundle = ParseAmInstrumentOutput(data)
+print("DEBUG: Number of lines checked to find numTests = " + str(numTestsLine))
+print("DEBUG: Number of tests = " + str(numTests))
+
 testResults = output
 
 failures = 0
@@ -55,8 +57,11 @@ for result in testResults:
 if(numTests != str(len(testResults))):
     failures += 1
 
-print("Amount of steps = " + str(len(testResults)) +
-      " (Claimed " + str(numTests) + ")")
+print("Amount of steps = " + str(len(testResults)) + " (Claimed " + str(numTests) + ")")
+print("  Passed :   " + str(len(testResults)-failures-skipped))
+print("  Failures : " + str(failures))
+print("  Skipped  : " + str(skipped))
+
 
 # add the step that checks that all tests have been executed the the number of
 # total test steps
@@ -82,4 +87,4 @@ with open(outputFile, "w") as outfile:
     outfile.write("\t</testsuite>\n")
     outfile.write("</testsuites>\n")
 
-print(outputFile + " exported")
+print(">> " + outputFile + " exported")
