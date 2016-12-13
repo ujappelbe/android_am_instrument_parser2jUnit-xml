@@ -20,9 +20,19 @@ the device."""
 
 import re
 import string
+import sys
+import time
+import datetime
 
+def ConvertTimestampStr2Int(timestamp_str, timestamp_style):
+  if timestamp_str == "UNINITIALIZED":
+      return 0
+  return time.mktime(datetime.datetime.strptime(timestamp_str, timestamp_style).timetuple())
 
-def ParseAmInstrumentOutput(result):
+def ConvertTimestampInt2Str(timestamp_int):
+  return datetime.datetime.fromtimestamp(timestamp_int).strftime(timestamp_style)
+
+def ParseAmInstrumentOutput(result, timestamp_style):
   """Given the raw output of an "am instrument" command that targets and
   InstrumentationTestRunner, return structured data.
 
@@ -40,7 +50,6 @@ def ParseAmInstrumentOutput(result):
     code.
   """
 
-  re_status_code = re.compile(r'INSTRUMENTATION_STATUS_CODE: (?P<status_code>-?\d)$')
   test_results = []
   inst_finished_bundle = {}
 
@@ -51,11 +60,16 @@ def ParseAmInstrumentOutput(result):
     if "INSTRUMENTATION_STATUS_CODE:" in line:
       test_result = TestResult(result_block_string)
       if test_result.GetStatusCode() == 1: # The test started
+        start_ts = ConvertTimestampStr2Int(test_result.GetTimestampStr(), timestamp_style)
         pass
-      elif test_result.GetStatusCode() in [0, -1, -2, -3]:
+      elif test_result.GetStatusCode() in [0, -1, -2, -3, -4]:
+        end_ts = ConvertTimestampStr2Int(test_result.GetTimestampStr(), timestamp_style)
+        duration_s = end_ts-start_ts
+        test_result.SetDuration(duration_s)
         test_results.append(test_result)
       else:
-        pass
+        print("Error. Not supported status code (" + str(test_result.GetStatusCode()) + "). Script aborted.")
+        sys.exit(-1)
       result_block_string = ""
     if "INSTRUMENTATION_CODE:" in line:
       inst_finished_bundle = _ParseInstrumentationFinishedBundle(result_block_string)
@@ -136,14 +150,26 @@ class TestResult(object):
     self._status_code = None
     self._failure_reason = None
     self._fields_map = {}
+    self._timestamp_str = "UNINITIALIZED"
+    self._duration_s = 0
 
-    re_status_code = re.search(r'INSTRUMENTATION_STATUS_CODE: '
-        '(?P<status_code>1|0|-1|-2|-3)', result_block_string)
-    re_fields = re.compile(r'INSTRUMENTATION_STATUS: '
-        '(?P<key>[\w.]+)=(?P<value>.*?)(?=\nINSTRUMENTATION_STATUS)', re.DOTALL)
+    re_status_code = re.search(r'INSTRUMENTATION_STATUS_CODE: (?P<status_code>-?\d+)', result_block_string)
+
+    raw_result_contains_timestamps=True
+    if(result_block_string.startswith('INSTRUMENTATION_STATUS')):
+      raw_result_contains_timestamps=False
+
+    if(raw_result_contains_timestamps):
+      re_fields = re.compile(r'(?P<timestamp>[\S.*]+) INSTRUMENTATION_STATUS: (?P<key>[\w.*]+)=(?P<value>.*?)(?=\n.*INSTRUMENTATION_STATUS)', re.DOTALL)
+    else:
+      re_fields = re.compile(r'INSTRUMENTATION_STATUS: (?P<key>[\w.*]+)=(?P<value>.*?)(?=\nINSTRUMENTATION_STATUS)', re.DOTALL)
 
     for field in re_fields.finditer(result_block_string):
-      key, value = (field.group('key').strip(), field.group('value').strip())
+      if(raw_result_contains_timestamps):
+        timestamp, key, value = (field.group('timestamp').strip(), field.group('key').strip(), field.group('value').strip())
+        self._timestamp_str = timestamp
+      else:
+        key, value = (field.group('key').strip(), field.group('value').strip())
       if key.startswith('performance.'):
         key = key[len('performance.'):]
       self._fields_map[key] = value
@@ -152,6 +178,7 @@ class TestResult(object):
 
     self._test_name = '%s:%s' % (self._fields_map['class'],
                                  self._fields_map['test'])
+
     self._status_code = int(re_status_code.group('status_code'))
     if 'stack' in self._fields_map:
       self._failure_reason = self._fields_map['stack']
@@ -167,3 +194,12 @@ class TestResult(object):
 
   def GetResultFields(self):
     return self._fields_map
+
+  def GetTimestampStr(self):
+    return self._timestamp_str
+
+  def GetDuration(self):
+    return self._duration_s
+
+  def SetDuration(self, duration_s):
+    self._duration_s = duration_s
