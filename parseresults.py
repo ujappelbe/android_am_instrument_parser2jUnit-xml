@@ -14,6 +14,7 @@
 import sys
 import re
 import string
+import cgi
 from am_instrument_parser import TestResult
 from am_instrument_parser import ParseAmInstrumentOutput
 
@@ -98,7 +99,8 @@ with open(outputFile, "w") as outfile:
             if(result.GetStatusCode() == -3):
                 outfile.write("\t\t\t<skipped />\n")
             else:
-                outfile.write("\t\t\t<failure> <![CDATA[" + str(result.GetFailureReason()) + "]]></failure>\n")
+                sanitizedCDATA = cgi.escape( str(result.GetFailureReason()) )
+                outfile.write("\t\t\t<failure> <![CDATA[" + sanitizedCDATA + "]]></failure>\n")
         outfile.write("\t\t</testcase>\n")
     outfile.write("\t\t<testcase name=\"All tests were executed\">\n")
     if(numTests != str(len(testResults))):
