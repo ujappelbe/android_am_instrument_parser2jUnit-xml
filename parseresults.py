@@ -90,7 +90,7 @@ totalNumTests = len(testResults) + 1
 
 with open(outputFile, "w") as outfile:
     outfile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-    outfile.write("<testsuites name=\"Unit Tests\" tests=\"" + str(totalNumTests) + "\" failures=\"" + str(failures) + "\" skipped=\"" + str(skipped) + "\"" + ">\n")
+    outfile.write("<testsuites name=\"Unit Tests\" tests_total=\"" + str(totalNumTests) + "\" failures_total=\"" + str(failures) + "\" skipped_total=\"" + str(skipped) + "\"" + ">\n")
     outfile.write("\t<testsuite name=\"" + rootSuiteName + "\" tests=\"" + str(totalNumTests) + "\" failures=\"" + str(failures) + "\" skipped=\"" + str(skipped) + "\"" + ">\n")
 
     for result in testResults:
